@@ -1,8 +1,8 @@
 import os
 import requests_mock
 import pytest
-from asadalpay.api import AsadalPayAPI
-from asadalpay.models.order import Order
+from ..asadalpay.api import AsadalPayAPI
+from ..asadalpay.models.order import Order
 
 
 def get_api_key(filename='asadalpay_api_key.txt'):
@@ -19,15 +19,14 @@ def order_api():
     return Order(api=api_instance)
 
 
-@requests_mock.Mocker()
-def test_create_order(order_api, mock):
+def test_create_order(order_api, requests_mock):
     # Мокаем HTTP ответ.
     order_response = {
         "products": [{"name": "test_product", "price": 100}],
         "currency": "KZT",
         "description": "Test Order"
     }
-    mock.post("https://api-dev.asadalpay.com/api/orders/create-order", json=order_response)
+    requests_mock.post("https://api-dev.asadalpay.com/api/orders/create-order", json=order_response)
 
     # Подготовим данные для заказа.
     products = [{"name": "TestProduct", "price": 100}]
@@ -39,8 +38,7 @@ def test_create_order(order_api, mock):
     assert response == order_response
 
 
-@requests_mock.Mocker()
-def test_get_order_by_uuid(order_api, mock):
+def test_get_order_by_uuid(order_api, requests_mock):
     # Мокаем HTTP ответ.
     order_uuid = "test_uuid"
     order_response = {
@@ -49,7 +47,7 @@ def test_get_order_by_uuid(order_api, mock):
         "currency": "KZT",
         "description": "Test Order"
     }
-    mock.get(f"https://api-dev.asadalpay.com/api/orders/{order_uuid}", json=order_response)
+    requests_mock.get(f"https://api-dev.asadalpay.com/api/orders/{order_uuid}", json=order_response)
 
     # Запрашиваем информацию о заказе и проверяем ответ.
     response = order_api.get_by_uuid(order_uuid=order_uuid)
